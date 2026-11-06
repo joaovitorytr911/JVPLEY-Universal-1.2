@@ -1,0 +1,6 @@
+{
+  "observacao": "Adicione somente URLs oficiais/autorizadas de streaming de rádio.",
+  "estacoes": [
+    {"nome": "Minha Rádio BR FM", "url": ""}
+  ]
+}
