@@ -6,6 +6,8 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
+start "JVPLEY Server" cmd /c "py bridge\server.py"
+timeout /t 2 /nobreak >nul
 start "" http://127.0.0.1:8765
-py bridge\server.py
+echo JVPLEY 1.3 iniciado. Feche a janela do servidor para encerrar.
 pause
