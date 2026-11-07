@@ -26,10 +26,14 @@
     </section>
     <section class="lower">
       <article class="panel">
-        <h3>ANDROID CARPLAY</h3>
+        <h3>ANDROID CARPLAY • BLUETOOTH</h3>
         <p id="device">NENHUM DISPOSITIVO CONECTADO</p>
-        <div class="actions"><button disabled>Conectar Android</button><button disabled>Conectar iOS</button></div>
-        <p class="hint">Conexão Bluetooth e pareamento serão implementados na etapa mobile.</p>
+        <div class="actions">
+          <button id="openBluetooth">Abrir Bluetooth do Windows</button>
+          <button id="refreshBluetooth">Atualizar dispositivos</button>
+        </div>
+        <ul id="bluetoothDevices" class="device-list"><li>Consultando Bluetooth do Windows...</li></ul>
+        <p id="bluetoothMessage" class="hint">Faça o pareamento nas configurações do Windows 11. O JVPLEY mostrará os dispositivos detectados.</p>
       </article>
       <article class="panel">
         <h3>MULTIMÍDIA</h3>
@@ -49,7 +53,7 @@
         <p class="hint">Chamadas reais exigem integração e permissões do Android/iOS. Esta tela ainda não atende ligações.</p>
       </article>
     </section>
-    <footer>JVPLEY 1.3 • Os campos permanecem “--” até receber telemetria real. Não são valores simulados.</footer>
+    <footer>JVPLEY 1.3 • Telemetria e conexão ativa de áudio só serão exibidas quando confirmadas.</footer>
   </main>
   <script src="app.js"></script>
 </body>
