@@ -1,37 +1,11 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JVPLEY Universal 1.2</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="shell">
-  <header><div class="brand">JV<span>PLEY</span><small>UNIVERSAL 1.2</small></div>
-    <div class="status"><i></i> CENTRAL MULTIMÍDIA <b id="clock">--:--</b></div></header>
-  <main>
-    <section class="hero">
-      <div class="orb"><div class="orb-core">S</div></div>
-      <div><p class="eyebrow">ASSISTENTE DE BORDO</p><h1>SCANIA</h1>
-      <p id="assistantText">Olá! Eu sou a SCANIA. Como posso ajudar na sua viagem?</p>
-      <button id="voiceBtn" class="voice">🎙 FALAR COM SCANIA</button></div>
-    </section>
-    <section class="apps" aria-label="Aplicativos">
-      <button class="app selected" data-app="youtube"><strong>▶</strong><span>YouTube</span><small>F2</small></button>
-      <button class="app" data-app="spotify"><strong>♫</strong><span>Spotify</span><small>F3</small></button>
-      <button class="app" data-app="radio"><strong>◖))</strong><span>Rádio BR FM</span><small>F4</small></button>
-      <button class="app" data-app="maps"><strong>⌖</strong><span>Maps BR</span><small>F5</small></button>
-    </section>
-    <section class="vehicle">
-      <div><p class="eyebrow">PAINEL DO VEÍCULO</p><h2>JVPLEY • MODO UNIVERSAL</h2></div>
-      <div class="metrics"><div><small>VELOCIDADE</small><b>-- <em>km/h</em></b></div>
-      <div><small>COMBUSTÍVEL</small><b>-- <em>%</em></b></div>
-      <div><small>CAMINHÃO</small><b>ETS2</b></div></div>
-      <p class="note">Telemetria demonstrativa — conexão real ainda não configurada.</p>
-    </section>
-  </main>
-  <footer>TECLADO: ↑ ↓ navegar • ENTER selecionar • ESC voltar • F1 menu <span>JVPLEY / SCANIA</span></footer>
-</div>
-<script src="app.js"></script>
-</body></html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JVPLEY Android CarPlay 1.3</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="shell">
+<header><div class="brand">JV<span>PLEY</span><small>ANDROID CARPLAY 1.3</small></div><div class="status"><i></i><span id="connection">AGUARDANDO ETS2</span><b id="clock">--:--</b></div></header>
+<main>
+<section class="hero"><div class="orb"><div class="orb-core">C</div></div><div><p class="eyebrow">ASSISTENTE DE BORDO</p><h1>CARVOZ</h1><p id="assistantText">Central multimídia pronta. Aguardando conexão com o caminhão.</p><button id="voiceBtn" class="primary">🎙 FALAR COM CARVOZ</button></div></section>
+<section class="apps"><button class="app" data-app="spotify"><strong>♫</strong><span>Spotify</span></button><button class="app" data-app="youtube"><strong>▶</strong><span>YouTube</span></button><button class="app" data-app="radio"><strong>◖))</strong><span>Rádio FM BR</span></button><button class="app" data-app="maps"><strong>⌖</strong><span>Mapa BR</span></button></section>
+<section class="vehicle"><div class="section-head"><div><p class="eyebrow">TELEMETRIA EURO TRUCK SIMULATOR 2</p><h2>Dados do caminhão</h2></div><span class="pill" id="telemetryState">SEM DADOS REAIS</span></div><div class="metrics"><div><small>VELOCIDADE</small><b id="speed">-- <em>km/h</em></b></div><div><small>COMBUSTÍVEL</small><b id="fuel">-- <em>%</em></b></div><div><small>CONSUMO</small><b id="consumption">--</b></div><div><small>TEMP. ÁGUA</small><b id="water">--</b></div><div><small>TEMP. ÓLEO</small><b id="oil">--</b></div><div><small>AR DOS FREIOS</small><b id="air">--</b></div><div><small>MARCHA</small><b id="gear">--</b></div><div><small>CAMINHÃO</small><b id="truck">--</b></div></div><p class="note">Os indicadores ficam como “--” até receber telemetria válida do ETS2. Pressão do ar dos freios não é pressão dos pneus.</p></section>
+<section class="connect-grid"><article class="panel"><p class="eyebrow">CONEXÃO DO CELULAR</p><h2>Bluetooth</h2><p id="bluetoothState">Nenhum dispositivo conectado</p><button class="secondary" id="bluetoothBtn">VER STATUS</button><small>O pareamento real depende do Bluetooth do Windows e do celular.</small></article>
+<article class="panel"><p class="eyebrow">TELEFONE</p><h2>Chamadas</h2><p id="callState">Nenhuma chamada recebida</p><div class="call-actions"><button class="answer" id="answerBtn" disabled>ATENDER</button><button class="reject" id="rejectBtn" disabled>RECUSAR</button></div><small>Controles demonstrativos; atender chamadas reais exige integração nativa Android/iOS.</small></article></section>
+</main><footer>JVPLEY 1.3 • ETS2 1.61 • PORTUGUÊS BRASIL <span>CARVOZ</span></footer></div><script src="app.js"></script></body></html>
