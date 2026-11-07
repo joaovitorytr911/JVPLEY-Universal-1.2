@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>JVPLEY Android CarPlay 1.3</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div><p class="eyebrow">CENTRAL MULTIMÍDIA • ETS2 1.61</p><h1>JVPLEY <span>1.3</span></h1></div>
+      <div class="connection"><i id="dot"></i><span id="connection">PONTE LOCAL: VERIFICANDO</span></div>
+    </header>
+    <section class="hero">
+      <div><p class="eyebrow">BEM-VINDO AO SEU CAMINHÃO</p><h2 id="truck">AGUARDANDO TELEMETRIA</h2><p id="gameState">Ligue o ETS2 e conecte o plugin de telemetria para receber dados reais.</p></div>
+      <div class="speed"><strong id="speed">--</strong><small>km/h</small></div>
+    </section>
+    <section class="grid">
+      <article class="tile"><small>ROTAÇÃO</small><strong id="rpm">--</strong><small>RPM</small></article>
+      <article class="tile"><small>MARCHA</small><strong id="gear">--</strong><small>TRANSMISSÃO</small></article>
+      <article class="tile"><small>COMBUSTÍVEL</small><strong id="fuel">--</strong><small>ESTADO REAL PENDENTE</small></article>
+      <article class="tile"><small>CONSUMO</small><strong id="consumption">--</strong><small>L/100 KM</small></article>
+      <article class="tile"><small>TEMPERATURA</small><strong id="temperature">--</strong><small>MOTOR</small></article>
+      <article class="tile"><small>PNEUS</small><strong id="tires">--</strong><small>PRESSÃO / PSI</small></article>
+    </section>
+    <section class="lower">
+      <article class="panel">
+        <h3>ANDROID CARPLAY</h3>
+        <p id="device">NENHUM DISPOSITIVO CONECTADO</p>
+        <div class="actions"><button disabled>Conectar Android</button><button disabled>Conectar iOS</button></div>
+        <p class="hint">Conexão Bluetooth e pareamento serão implementados na etapa mobile.</p>
+      </article>
+      <article class="panel">
+        <h3>MULTIMÍDIA</h3>
+        <div class="actions"><button disabled>Spotify</button><button disabled>YouTube</button><button disabled>Rádio FM BR</button></div>
+        <p class="hint">Controles de mídia serão ativados após a integração com o celular.</p>
+      </article>
+      <article class="panel">
+        <h3>CARVOZ</h3>
+        <p>Assistente de voz em português brasileiro</p>
+        <button disabled>Ativar CARVOZ</button>
+        <p class="hint">Microfone ainda não conectado.</p>
+      </article>
+      <article class="panel">
+        <h3>TELEFONE</h3>
+        <p id="callState">NENHUMA CHAMADA</p>
+        <div class="actions"><button disabled>Atender</button><button disabled>Recusar</button></div>
+        <p class="hint">Chamadas reais exigem integração e permissões do Android/iOS. Esta tela ainda não atende ligações.</p>
+      </article>
+    </section>
+    <footer>JVPLEY 1.3 • Os campos permanecem “--” até receber telemetria real. Não são valores simulados.</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
