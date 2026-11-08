@@ -26,7 +26,7 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Publish CARPLEY for Windows x64
-        run: dotnet publish desktop/CARPLEY.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o artifacts/CARPLEY-1.3-win-x64
+        run: dotnet publish desktop/CARPLEY.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/CARPLEY-1.3-win-x64
 
       - name: Verify executable and central files
         shell: pwsh
@@ -34,13 +34,30 @@ jobs:
           if (!(Test-Path "artifacts/CARPLEY-1.3-win-x64/CARPLEY.exe")) { throw "CARPLEY.exe was not generated." }
           if (!(Test-Path "artifacts/CARPLEY-1.3-win-x64/app/index.html")) { throw "Central app/index.html was not included." }
 
+      - name: Scan build with Microsoft Defender
+        shell: pwsh
+        run: |
+          Update-MpSignature
+          $mp = Join-Path $env:ProgramFiles "Windows Defender\\MpCmdRun.exe"
+          if (!(Test-Path $mp)) { throw "Microsoft Defender command-line scanner not found." }
+          & $mp -Scan -ScanType 3 -File (Resolve-Path "artifacts/CARPLEY-1.3-win-x64")
+          if ($LASTEXITCODE -ne 0) { throw "Microsoft Defender reported a scan error or detection. Do not distribute this build." }
+
       - name: Package Windows app
         run: Compress-Archive -Path artifacts/CARPLEY-1.3-win-x64/* -DestinationPath artifacts/CARPLEY-1.3-Windows-x64.zip
+
+      - name: Create SHA256 checksum
+        shell: pwsh
+        run: |
+          $hash = Get-FileHash "artifacts/CARPLEY-1.3-Windows-x64.zip" -Algorithm SHA256
+          "$($hash.Hash)  CARPLEY-1.3-Windows-x64.zip" | Out-File "artifacts/SHA256.txt" -Encoding ascii
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
           name: CARPLEY-1.3-Windows-x64
-          path: artifacts/CARPLEY-1.3-Windows-x64.zip
+          path: |
+            artifacts/CARPLEY-1.3-Windows-x64.zip
+            artifacts/SHA256.txt
           if-no-files-found: error
           retention-days: 14
