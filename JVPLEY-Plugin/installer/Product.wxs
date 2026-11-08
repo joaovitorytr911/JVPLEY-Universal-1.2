@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="JVPLEY Universal 1.3 - Plugin de Telemetria ETS2"
+      Manufacturer="JVPLEY"
+      Version="1.3.0"
+      UpgradeCode="{A6B44A7D-59B2-4F40-91C0-1B63C6F7A31D}"
+      Language="1046"
+      Scope="perMachine"
+      Platform="x64">
+
+    <MajorUpgrade DowngradeErrorMessage="Uma versão mais nova do JVPLEY já está instalada." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="JVPLEY Universal 1.3">
+        <Component Id="TelemetryPluginComponent" Guid="{7F0E8F2A-8F8B-4CB4-9A19-8F74C5F56E19}">
+          <File Id="JVPLEYDll" Source="$(var.PluginDll)" KeyPath="yes" />
+          <RegistryValue
+              Root="HKLM"
+              Key="SOFTWARE\SCS Software\Euro Truck Simulator 2\Plugins"
+              Name="JVPLEY Universal 1.3"
+              Type="string"
+              Value="[INSTALLFOLDER]JVPLEY.dll" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="ProductFeature" Title="JVPLEY ETS2 Telemetry Plugin" Level="1">
+      <ComponentRef Id="TelemetryPluginComponent" />
+    </Feature>
+  </Package>
+</Wix>
