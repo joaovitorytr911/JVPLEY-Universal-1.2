@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -132,7 +133,7 @@ bool write_telemetry_file()
     return true;
 }
 
-void on_speed(const scs_string_t name, const scs_u32_t index,
+SCSAPI_VOID on_speed(const scs_string_t name, const scs_u32_t index,
     const scs_value_t* const value, const scs_context_t context)
 {
     (void)name; (void)index; (void)context;
@@ -146,7 +147,7 @@ void on_speed(const scs_string_t name, const scs_u32_t index,
     }
 }
 
-void on_rpm(const scs_string_t name, const scs_u32_t index,
+SCSAPI_VOID on_rpm(const scs_string_t name, const scs_u32_t index,
     const scs_value_t* const value, const scs_context_t context)
 {
     (void)name; (void)index; (void)context;
@@ -160,7 +161,7 @@ void on_rpm(const scs_string_t name, const scs_u32_t index,
     }
 }
 
-void on_gear(const scs_string_t name, const scs_u32_t index,
+SCSAPI_VOID on_gear(const scs_string_t name, const scs_u32_t index,
     const scs_value_t* const value, const scs_context_t context)
 {
     (void)name; (void)index; (void)context;
@@ -174,7 +175,7 @@ void on_gear(const scs_string_t name, const scs_u32_t index,
     }
 }
 
-void on_fuel(const scs_string_t name, const scs_u32_t index,
+SCSAPI_VOID on_fuel(const scs_string_t name, const scs_u32_t index,
     const scs_value_t* const value, const scs_context_t context)
 {
     (void)name; (void)index; (void)context;
@@ -188,7 +189,7 @@ void on_fuel(const scs_string_t name, const scs_u32_t index,
     }
 }
 
-void on_event(const scs_event_t event, const void* const event_info,
+SCSAPI_VOID on_event(const scs_event_t event, const void* const event_info,
     const scs_context_t context)
 {
     (void)event_info; (void)context;
