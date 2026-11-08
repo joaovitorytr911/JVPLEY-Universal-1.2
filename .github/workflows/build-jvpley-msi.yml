@@ -1,0 +1,69 @@
+name: Build JVPLEY Universal 1.3 MSI
+
+on:
+  push:
+    branches:
+      - jvpley-ets2-telemetry-plugin
+    paths:
+      - "JVPLEY-Plugin/**"
+      - ".github/workflows/build-jvpley-msi.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-x64:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Download official SCS Telemetry SDK 1.16
+        shell: pwsh
+        run: |
+          $sdkZip = Join-Path $env:RUNNER_TEMP "scs_sdk_1_16.zip"
+          $sdkRoot = Join-Path $env:RUNNER_TEMP "scs_sdk_1_16"
+          Invoke-WebRequest -Uri "https://download.eurotrucksimulator2.com/scs_sdk_1_16.zip" -OutFile $sdkZip
+          Expand-Archive -LiteralPath $sdkZip -DestinationPath $sdkRoot -Force
+          $header = Get-ChildItem -Path $sdkRoot -Filter "scssdk_telemetry.h" -Recurse | Select-Object -First 1
+          if (-not $header) { throw "scssdk_telemetry.h was not found in the official SDK archive." }
+          "SCS_SDK_INCLUDE_DIR=$($header.Directory.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Compile JVPLEY.dll
+        shell: pwsh
+        run: |
+          cmake -S JVPLEY-Plugin -B build -A x64 "-DSCS_SDK_INCLUDE_DIR=$env:SCS_SDK_INCLUDE_DIR"
+          cmake --build build --config Release
+          $dll = Join-Path $PWD "build\Release\JVPLEY.dll"
+          if (-not (Test-Path $dll)) { throw "JVPLEY.dll was not generated." }
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Copy-Item $dll artifacts\JVPLEY.dll
+          dumpbin /headers artifacts\JVPLEY.dll | Select-String "machine (x64)" | Out-Host
+
+      - name: Build Windows Installer MSI
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 4.0.5
+          $dllPath = (Resolve-Path "artifacts\JVPLEY.dll").Path
+          $wxsPath = (Resolve-Path "JVPLEY-Plugin\installer\Product.wxs").Path
+          $msiPath = Join-Path $PWD "artifacts\JVPLEY-Universal-1.3.msi"
+          wix build -arch x64 -d "PluginDll=$dllPath" -out $msiPath $wxsPath
+          if (-not (Test-Path $msiPath)) { throw "MSI was not generated." }
+          Get-FileHash artifacts\JVPLEY.dll -Algorithm SHA256
+          Get-FileHash $msiPath -Algorithm SHA256
+
+      - name: Upload development package
+        uses: actions/upload-artifact@v4
+        with:
+          name: JVPLEY-Universal-1.3-development-x64
+          path: |
+            artifacts/JVPLEY.dll
+            artifacts/JVPLEY-Universal-1.3.msi
+          if-no-files-found: error
+          retention-days: 14
