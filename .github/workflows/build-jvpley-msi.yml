@@ -44,12 +44,19 @@ jobs:
           if (-not (Test-Path $dll)) { throw "JVPLEY.dll was not generated." }
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
           Copy-Item $dll artifacts\JVPLEY.dll
-          dumpbin /headers artifacts\JVPLEY.dll | Select-String "machine (x64)" | Out-Host
+          $headers = dumpbin /headers artifacts\JVPLEY.dll | Out-String
+          if ($headers -notmatch "machine \(x64\)") { throw "The generated DLL is not x64." }
+          $exports = dumpbin /exports artifacts\JVPLEY.dll | Out-String
+          if ($exports -notmatch "scs_telemetry_init" -or $exports -notmatch "scs_telemetry_shutdown") {
+            throw "The required SCS telemetry entry points were not exported."
+          }
 
       - name: Build Windows Installer MSI
         shell: pwsh
         run: |
           dotnet tool install --global wix --version 4.0.5
+          $env:PATH = "$env:USERPROFILE\.dotnet\tools;$env:PATH"
+          wix --version
           $dllPath = (Resolve-Path "artifacts\JVPLEY.dll").Path
           $wxsPath = (Resolve-Path "JVPLEY-Plugin\installer\Product.wxs").Path
           $msiPath = Join-Path $PWD "artifacts\JVPLEY-Universal-1.3.msi"
