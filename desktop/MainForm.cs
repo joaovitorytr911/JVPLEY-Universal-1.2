@@ -6,7 +6,7 @@ namespace CARPLEY.Desktop;
 public sealed class MainForm : Form
 {
     private readonly WebView2 browser = new();
-    private readonly string pagePath;
+    private readonly string pagePath = Path.Combine(AppContext.BaseDirectory, "app", "index.html");
     private bool fullScreen = true;
     private FormBorderStyle previousBorder;
     private FormWindowState previousState;
@@ -18,8 +18,6 @@ public sealed class MainForm : Form
         StartPosition = FormStartPosition.CenterScreen;
         BackColor = Color.FromArgb(3, 9, 16);
         MinimumSize = new Size(900, 540);
-        pagePath = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory, "..", "..", "..", "..", "app", "index.html"));
 
         browser.Dock = DockStyle.Fill;
         browser.DefaultBackgroundColor = Color.FromArgb(3, 9, 16);
@@ -37,7 +35,7 @@ public sealed class MainForm : Form
             if (!File.Exists(pagePath))
             {
                 MessageBox.Show(
-                    "Não encontrei app/index.html. Confira a pasta do CARPLEY.",
+                    "Não encontrei app/index.html na pasta do aplicativo. Reinstale o CARPLEY ou confira os arquivos.",
                     "CARPLEY", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -52,7 +50,7 @@ public sealed class MainForm : Form
         catch (Exception ex)
         {
             MessageBox.Show(
-                "Não foi possível iniciar a central. Verifique se o Microsoft Edge WebView2 Runtime está instalado.\n\n" + ex.Message,
+                "Não foi possível iniciar a central. O Microsoft Edge WebView2 Runtime pode estar ausente.\n\n" + ex.Message,
                 "CARPLEY - falha ao iniciar", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
