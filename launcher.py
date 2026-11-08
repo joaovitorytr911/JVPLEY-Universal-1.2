@@ -1,4 +1,5 @@
 import argparse
+import shutil
 import subprocess
 import time
 import webbrowser
@@ -6,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 URL = (ROOT / "app" / "index.html").as_uri()
+
 
 def game_is_running():
     try:
@@ -17,26 +19,63 @@ def game_is_running():
     except Exception:
         return False
 
+
+def find_browser():
+    """Find Edge or Chrome so the central opens in an app-style window."""
+    candidates = [
+        shutil.which("msedge"),
+        shutil.which("chrome"),
+        str(Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")),
+        str(Path("C:/Program Files/Microsoft/Edge/Application/msedge.exe")),
+        str(Path("C:/Program Files/Google/Chrome/Application/chrome.exe")),
+        str(Path("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe")),
+    ]
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file():
+            return candidate
+    return None
+
+
+def open_central():
+    browser = find_browser()
+    if browser:
+        try:
+            subprocess.Popen([
+                browser,
+                "--app=" + URL,
+                "--start-fullscreen",
+                "--no-first-run",
+                "--disable-session-crashed-bubble",
+            ])
+            return
+        except OSError:
+            pass
+    # Fallback: use the Windows default browser if Edge/Chrome is not found.
+    webbrowser.open(URL)
+
+
 def main():
-    parser = argparse.ArgumentParser(description="JVPLEY Universal 1.2")
+    parser = argparse.ArgumentParser(description="CARPLEY Universal 1.3")
     parser.add_argument("--demo", action="store_true", help="Abrir sem esperar pelo ETS2")
     args = parser.parse_args()
 
-    print("JVPLEY Universal 1.2 - Assistente SCANIA")
+    print("CARPLEY Universal 1.3")
     if args.demo:
-        webbrowser.open(URL)
+        open_central()
         return
 
     print("Aguardando o Euro Truck Simulator 2...")
     opened = False
     while True:
-        if game_is_running() and not opened:
-            webbrowser.open(URL)
+        running = game_is_running()
+        if running and not opened:
+            open_central()
             opened = True
-            print("ETS2 detectado. JVPLEY iniciado.")
-        if not game_is_running():
+            print("ETS2 detectado. Central CARPLEY aberta.")
+        elif not running:
             opened = False
         time.sleep(3)
+
 
 if __name__ == "__main__":
     main()
