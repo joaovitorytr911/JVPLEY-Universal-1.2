@@ -14,6 +14,7 @@ internal sealed class TelemetryPipeClient
 
     public async Task RunAsync(
         Action<double> onConsumption,
+        Action onConsumptionUnavailable,
         Action<bool> onConnectionChanged,
         CancellationToken cancellationToken)
     {
@@ -44,7 +45,20 @@ internal sealed class TelemetryPipeClient
                         if (!root.TryGetProperty("type", out var type) ||
                             type.ValueKind != JsonValueKind.String ||
                             type.GetString() != "consumption" ||
-                            !root.TryGetProperty("value", out var valueElement) ||
+                            !root.TryGetProperty("available", out var availableElement) ||
+                            (availableElement.ValueKind != JsonValueKind.True &&
+                             availableElement.ValueKind != JsonValueKind.False))
+                        {
+                            continue;
+                        }
+
+                        if (availableElement.ValueKind == JsonValueKind.False)
+                        {
+                            onConsumptionUnavailable();
+                            continue;
+                        }
+
+                        if (!root.TryGetProperty("value", out var valueElement) ||
                             !valueElement.TryGetDouble(out var value) ||
                             !double.IsFinite(value) ||
                             value < 0 ||
