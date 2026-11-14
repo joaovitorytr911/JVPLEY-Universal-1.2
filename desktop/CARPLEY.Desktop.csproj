@@ -2,14 +2,16 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>CARPLEY</AssemblyName>
-    <RootNamespace>CARPLEY.Desktop</RootNamespace>
+    <AssemblyName>JVRSMPLAY</AssemblyName>
+    <RootNamespace>JVRSMPLAY.Desktop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="..\\app\\**\\*">
-      <Link>app\\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <Content Include="..\app\**\*">
+      <Link>app\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
