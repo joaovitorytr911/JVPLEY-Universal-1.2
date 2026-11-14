@@ -1,6 +1,7 @@
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.Diagnostics;
+using System.Globalization;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -34,6 +35,9 @@ internal static class Program
         };
 
         var browser = new WebView2 { Dock = DockStyle.Fill };
+        using var telemetryCancellation = new CancellationTokenSource();
+        var telemetryStarted = false;
+        window.FormClosed += (_, _) => telemetryCancellation.Cancel();
         window.Controls.Add(browser);
 
         window.Shown += async (_, _) =>
@@ -74,6 +78,29 @@ internal static class Program
                     }
 
                     e.Cancel = true;
+                };
+
+                browser.NavigationCompleted += (_, _) =>
+                {
+                    if (telemetryStarted) return;
+                    telemetryStarted = true;
+
+                    var telemetry = new TelemetryPipeClient();
+                    _ = telemetry.RunAsync(
+                        value =>
+                        {
+                            if (window.IsDisposed) return;
+                            var number = value.ToString(CultureInfo.InvariantCulture);
+                            window.BeginInvoke(new Action(() =>
+                                _ = browser.ExecuteScriptAsync($"window.setTelemetryConsumption({number});")));
+                        },
+                        connected =>
+                        {
+                            if (window.IsDisposed) return;
+                            window.BeginInvoke(new Action(() =>
+                                _ = browser.ExecuteScriptAsync($"window.setTelemetryConnection({connected.ToString().ToLowerInvariant()});")));
+                        },
+                        telemetryCancellation.Token);
                 };
 
                 browser.Source = new Uri(pagePath);
