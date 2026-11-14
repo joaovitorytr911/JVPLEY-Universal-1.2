@@ -87,12 +87,12 @@ jobs:
           Copy-Item "plugin/INSTALL.txt" $pluginDir -Force
           Copy-Item "plugin/LICENSE-SCS-SDK.txt" $pluginDir -Force
 
-      - name: Verify executable and central files
+      - name: Verify native Windows app and ETS2 plugin
         shell: pwsh
         run: |
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/JVRSMPLAY.exe")) { throw "JVRSMPLAY.exe was not generated." }
-          if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/app/index.html")) { throw "Central app/index.html was not included." }
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/ETS2-Plugin/JVRSMPLAY-ETS2-x64.dll")) { throw "ETS2 x64 plugin DLL was not included." }
+          if (Test-Path "artifacts/JVRSMPLAY-win-x64/Microsoft.Web.WebView2*.dll") { throw "Unexpected WebView2 dependency remains in the published app." }
 
       - name: Scan application and plugin files with Microsoft Defender
         shell: pwsh
