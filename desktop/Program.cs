@@ -78,13 +78,14 @@ internal sealed class JvrsmMainForm : Form
             BackColor = BackgroundColor,
             Padding = new Padding(28),
             ColumnCount = 1,
-            RowCount = 5
+            RowCount = 6
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 35));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 23));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 28));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 14));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
         Controls.Add(root);
 
         var header = new Panel { Dock = DockStyle.Fill, BackColor = BackgroundColor };
@@ -201,8 +202,6 @@ internal sealed class JvrsmMainForm : Form
         footer.Dock = DockStyle.Fill;
         footer.TextAlign = ContentAlignment.MiddleLeft;
         root.Controls.Add(footer, 0, 5);
-        root.RowCount = 6;
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
     }
 
     private Panel MakePanel() => new()
