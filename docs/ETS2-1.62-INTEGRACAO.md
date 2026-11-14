@@ -68,3 +68,39 @@ O lado cliente do canal local está implementado. O servidor do Named Pipe dentr
 - O cabeçalho público espelhado `scssdk_telemetry.h` descreve a inicialização/exportação do plugin e as versões de API 1.00/1.01.
 - Implementações públicas registram `TRUCK_CHANNEL_fuel_average_consumption` como canal de consumo médio. Essas referências servem para orientar a implementação, não comprovam suporte do ETS2 1.62.
 - Não foi identificada nesta etapa uma confirmação oficial de compatibilidade da API com ETS2 1.62. Exigir teste real no jogo.
+
+## Implementação nativa do plugin — 2026-11-14
+
+A auditoria acima registra o estado anterior à implementação. Esta seção atualiza o estado atual da branch.
+
+### SDK utilizado
+- O workflow baixa o **SCS Telemetry SDK 1.16** do endereço oficial \`https://download.eurotrucksimulator2.com/scs_sdk_1_16.zip\`.
+- O pacote do SDK é versão 1.16; a API de telemetria declarada nos headers é 1.01. São números diferentes e não devem ser confundidos.
+- A página oficial da SCS lista o SDK 1.16 como versão estável mais recente consultada nesta revisão.
+- A licença do SDK foi registrada em \`plugin/LICENSE-SCS-SDK.txt\`.
+
+### Código criado
+- \`plugin/TelemetryPlugin.cpp\`: DLL nativa que exporta \`scs_telemetry_init\` e \`scs_telemetry_shutdown\`.
+- O plugin valida o jogo \`eut2\` e registra somente o canal \`truck.fuel.consumption.average\`, do tipo float.
+- O SDK fornece esse canal em litros por quilômetro. O plugin converte o valor para L/100 km multiplicando por 100.
+- O plugin publica mensagens JSON por Named Pipe local \`JVRSMPLAY.Telemetry.v1\`; não abre porta TCP.
+- \`desktop/TelemetryPipeClient.cs\` recebe e valida o protocolo, e a interface limpa o indicador quando o SDK informa que o valor está indisponível.
+- \`plugin/CMakeLists.txt\` exige compilação x64 com MSVC.
+
+### Compilação e pacote
+- O workflow baixa o SDK oficial, compila a DLL x64 e verifica a arquitetura PE AMD64 e as duas exportações obrigatórias.
+- O pacote MSI inclui os arquivos do aplicativo e a pasta \`ETS2-Plugin\`; o artefato também contém um ZIP separado para o plugin.
+- Nesta etapa a instalação do plugin no jogo ainda é manual: copiar a DLL para \`bin/win_x64/plugins\`, conforme \`plugin/INSTALL.txt\`. O MSI ainda não detecta nem altera automaticamente a pasta do ETS2.
+- A compilação do workflow ainda precisa terminar com sucesso para confirmar que a DLL foi realmente gerada. A existência do código-fonte não equivale a uma DLL compilada.
+
+### Limites que permanecem
+- Ainda não há teste real de carregamento e leitura no ETS2 1.62. A versão estável do SDK e a API declarada não provam, por si só, compatibilidade com essa versão específica do jogo.
+- Ainda não foi conferido no jogo se o canal entrega valores corretos em todos os caminhões originais e no mapa BR Brasil 6.2.
+- Não anunciar a integração como funcional até a compilação do workflow e o teste real no ETS2 1.62.
+
+### Protocolo IPC v1 atualizado
+Cada linha JSON contém uma mensagem:
+- Disponível: \`{"type":"consumption","available":true,"value":12.3,"unit":"L/100km"}\`
+- Indisponível: \`{"type":"consumption","available":false}\`
+
+O cliente só apresenta valores numéricos finitos, não negativos e com unidade exata \`L/100km\`.
