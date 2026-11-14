@@ -4,7 +4,7 @@ html,body{width:100%;min-height:100%;margin:0}
 body{background:radial-gradient(ellipse at 50% 0,#07385a 0,#061522 48%,#030910 100%);color:#e8f8ff;font-family:Segoe UI,Arial,sans-serif;min-height:100vh;overflow-x:hidden}
 .shell{width:100%;max-width:none;min-height:100vh;margin:0;padding:clamp(14px,2vw,30px)}
 header,footer{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a6684;padding:10px 0 18px}
-.brand{font-size:30px;font-weight:900;letter-spacing:3px}.brand span{color:var(--cyan)}.brand small{display:block;font-size:9px;letter-spacing:4px;color:#78b9d1}
+.brand{font-size:30px;font-weight:900;letter-spacing:3px;color:#35caff;text-shadow:0 0 14px #008bff66}.brand span{background:linear-gradient(90deg,#ff5b5b,#ffbf4b,#eaff62,#55e8a5,#5bdcff,#b48aff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}.brand small{display:block;font-size:9px;letter-spacing:4px;color:#78b9d1;text-shadow:none}
 .status{font-size:11px;letter-spacing:2px;color:#9cc8d8}.status i{display:inline-block;width:8px;height:8px;background:#4dffb0;border-radius:50%;margin-right:8px;box-shadow:0 0 12px #4dffb0}
 .status b{margin-left:20px;color:white;font-size:14px}
 .hero{display:flex;align-items:center;gap:34px;padding:clamp(24px,4vw,52px) 5%;border:1px solid #17658b;border-radius:18px;margin:clamp(16px,2.5vh,28px) 0;background:linear-gradient(110deg,#092b43cc,#071827cc);box-shadow:0 0 35px #008ac322}
