@@ -136,7 +136,7 @@ jobs:
           "$($pluginHash.Hash)  JVRSMPLAY-ETS2-Plugin-x64.zip" | Out-File "artifacts/SHA256.txt" -Append -Encoding ascii
 
       - name: Publish permanent GitHub Release for successful test builds
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+        if: ${{ success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'push') }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: JVRSMPLAY-v1.3.0-build-${{ github.run_number }}
