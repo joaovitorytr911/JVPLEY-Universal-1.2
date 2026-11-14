@@ -1,25 +1,27 @@
-# JVPLEY Universal 1.2
+# JVRSMPLAY — branch carpley-1.3
 
-Central multimídia experimental em português para Windows 11 e Euro Truck Simulator 2.
+Projeto experimental de central multimídia para Windows 11 e Euro Truck Simulator 2.
 
-## Recursos do protótipo
-- Interface futurista azul, com a assistente SCANIA.
-- Atalhos: F1 menu, F2 YouTube, F3 Spotify, F4 Rádio, F5 Maps.
-- Navegação com setas, Enter e Esc.
-- Fala em português brasileiro usando as vozes disponíveis no navegador.
-- Reconhecimento de comandos de voz, se o navegador oferecer suporte.
-- Iniciador que detecta o processo eurotrucks2.exe e abre a interface.
+## Estado atual
+- Aplicativo Windows x64 com interface multimídia.
+- Controle de volume da voz e dos sons internos do aplicativo.
+- Cliente de telemetria local preparado para receber somente consumo em L/100 km.
+- Código-fonte inicial de plugin nativo ETS2 x64 em plugin/.
+- Workflow Windows configurado para baixar o SCS Telemetry SDK 1.16, compilar a DLL, validar arquitetura/exportações e empacotar o instalador e o plugin.
 
-## Instalação e uso
-1. Baixe o projeto pelo botão **Code → Download ZIP**.
-2. Extraia o arquivo ZIP no Windows.
-3. Abra a pasta extraída e execute `JVPLEY-Iniciar.bat`.
-4. O iniciador aguarda o ETS2 e abre a interface quando o jogo estiver rodando.
-5. Para testar a interface sem abrir o jogo, execute `py launcher.py --demo` em um terminal.
+## Como a telemetria está planejada
+O plugin registra o canal de consumo médio do SDK da SCS e transmite o valor ao aplicativo por Named Pipe local. O painel não inventa valores: sem dados válidos, mostra --.
 
-Requer Python 3 no Windows para o iniciador. A interface é aberta no navegador padrão.
+## Limitações atuais
+- A DLL ainda precisa ser compilada com sucesso pelo GitHub Actions.
+- A compatibilidade com ETS2 1.62 ainda precisa ser confirmada em teste real no jogo.
+- O plugin ainda deve ser copiado manualmente para bin/win_x64/plugins; a instalação automática no diretório do ETS2 não foi implementada.
+- O painel do aplicativo ainda é uma janela externa/overlay de teste, não a tela original da cabine do caminhão.
+- YouTube, Spotify e Maps são abertos em páginas externas; a rádio depende de uma fonte de streaming autorizada.
 
-## Limitações importantes
-Esta versão é um protótipo externo: não aparece dentro da tela original do painel do caminhão e ainda não lê telemetria real. Os números do painel são demonstrativos. A integração na cabine exige adaptar os arquivos de dashboard de cada caminhão/mod e implementar uma ligação com os dados do jogo.
+## Documentação
+- docs/ETS2-1.62-INTEGRACAO.md — arquitetura, protocolo IPC, limitações e critérios de teste.
+- plugin/INSTALL.txt — instruções de instalação manual para teste.
+- plugin/LICENSE-SCS-SDK.txt — aviso de licença do SDK da SCS.
 
-YouTube, Spotify e Google Maps são abertos como páginas externas. A rádio precisa de um endereço de streaming oficial/autorizado configurado. O reconhecimento de voz depende do navegador e das permissões de microfone. A voz é a voz pt-BR disponível no sistema/navegador, não uma cópia da voz do filme.
+Não distribua nem instale a DLL antes de confirmar a execução bem-sucedida do workflow e fazer backup da pasta de plugins do jogo.
