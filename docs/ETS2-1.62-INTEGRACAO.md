@@ -32,3 +32,25 @@ GPS inspirado no Google Maps: rota azul, marcador azul do caminhão, distância 
 - instalador não substitui arquivos de terceiros.
 
 Até cumprir esses critérios, a integração permanece em desenvolvimento e não deve ser anunciada como funcional.
+
+## Auditoria técnica do plugin — 2026-11-14
+
+### Estado encontrado no repositório
+- Não há, nesta branch, código-fonte nativo do plugin ETS2 nem DLL x64 compilada.
+- O workflow Windows atual publica o aplicativo e o MSI, mas não compila nem inclui um plugin ETS2.
+- Portanto, o artefato atual não pode ser anunciado como integração com o jogo.
+
+### Pesquisa de referência do SDK
+- A API de telemetria da SCS usa um plugin nativo carregado pelo jogo e callbacks para registrar canais.
+- O canal de consumo médio de combustível aparece em implementações públicas da API como TRUCK_CHANNEL_fuel_average_consumption.
+- A documentação pública consultada para projetos de terceiros ainda lista suporte comprovado somente até ETS2 1.46 em algumas implementações. Isso não prova incompatibilidade com 1.62, mas também não prova compatibilidade.
+- O plugin deste projeto deverá ser compilado a partir de código-fonte identificado e headers do SDK com licença e versão registradas. Não reutilizar DLL binária de terceiros.
+
+### Próximas tarefas obrigatórias
+1. Fixar a origem e a versão dos headers oficiais do SCS Telemetry SDK e registrar a licença.
+2. Implementar uma DLL própria x64 que exporte as funções exigidas pela API de telemetria e registre apenas os canais necessários ao consumo.
+3. Publicar o consumo por IPC local com formato e versão documentados, sem expor uma porta de rede.
+4. Adicionar a compilação nativa x64 ao workflow Windows e verificar arquitetura, exports e presença da DLL no pacote.
+5. Só depois realizar teste real no ETS2 1.62: carregamento do plugin, leitura de consumo e encerramento/desconexão.
+
+**Status atual: integração ainda não implementada.** Esta auditoria não cria nem representa uma DLL funcional.
