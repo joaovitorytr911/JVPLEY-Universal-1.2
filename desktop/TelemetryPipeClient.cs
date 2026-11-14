@@ -5,7 +5,7 @@ namespace JVRSMPLAY.Desktop;
 
 /// <summary>
 /// Receives newline-delimited JSON from the local ETS2 telemetry plugin.
-/// Protocol v1: {"type":"consumption","value":number,"unit":"L/100km"}.
+/// Protocol v1: consumption messages include an available flag; valid values use L/100km.
 /// The pipe is local-only; no TCP listener is opened.
 /// </summary>
 internal sealed class TelemetryPipeClient
