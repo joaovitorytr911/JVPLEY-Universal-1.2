@@ -1,16 +1,27 @@
 const buttons=[...document.querySelectorAll('.app')];
 let selected=0;
+let appVolume=0.7;
 const assistantText=document.getElementById('assistantText');
 function say(message){
   assistantText.textContent=message;
   if('speechSynthesis' in window){
     speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(message);u.lang='pt-BR';u.rate=1;u.pitch=1.08;
+    const u=new SpeechSynthesisUtterance(message);u.lang='pt-BR';u.rate=1;u.pitch=1.08;u.volume=appVolume;
     const voices=speechSynthesis.getVoices();
     const pt=voices.find(v=>v.lang.toLowerCase().startsWith('pt-br'));
     if(pt)u.voice=pt;speechSynthesis.speak(u);
   }
 }
+const volumeControl=document.getElementById('volumeControl');
+const volumeValue=document.getElementById('volumeValue');
+const volumeDial=document.getElementById('volumeDial');
+function setVolume(value){
+  appVolume=Number(value)/100;
+  volumeValue.textContent=value+'%';
+  volumeDial.style.setProperty('--volume',value+'%');
+}
+volumeControl.addEventListener('input',event=>setVolume(event.target.value));
+setVolume(volumeControl.value);
 function openApp(name){
   const urls={youtube:'https://www.youtube.com/',spotify:'https://open.spotify.com/',maps:'https://www.google.com/maps'};
   if(name==='radio'){say('Rádio BR FM selecionada. Configure uma estação de streaming autorizada no arquivo app.js.');return;}
@@ -19,7 +30,7 @@ function openApp(name){
 function choose(i){selected=(i+buttons.length)%buttons.length;buttons.forEach((b,n)=>b.classList.toggle('selected',n===selected));}
 buttons.forEach((b,i)=>b.addEventListener('click',()=>{choose(i);openApp(b.dataset.app)}));
 document.addEventListener('keydown',e=>{
- if(e.key==='F1'){e.preventDefault();say('Menu principal do JVPLEY.');}
+ if(e.key==='F1'){e.preventDefault();say('Menu principal do JVRSM PLAY.');}
  if(e.key==='F2')openApp('youtube');if(e.key==='F3')openApp('spotify');
  if(e.key==='F4')openApp('radio');if(e.key==='F5')openApp('maps');
  if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();choose(selected+1);}
