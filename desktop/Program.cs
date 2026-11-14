@@ -94,6 +94,12 @@ internal static class Program
                             window.BeginInvoke(new Action(() =>
                                 _ = browser.ExecuteScriptAsync($"window.setTelemetryConsumption({number});")));
                         },
+                        () =>
+                        {
+                            if (window.IsDisposed) return;
+                            window.BeginInvoke(new Action(() =>
+                                _ = browser.ExecuteScriptAsync("window.clearTelemetryConsumption();")));
+                        },
                         connected =>
                         {
                             if (window.IsDisposed) return;
