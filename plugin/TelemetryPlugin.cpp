@@ -150,7 +150,7 @@ void stopPipeServer()
 }
 } // namespace
 
-extern "C" __declspec(dllexport) SCSAPI_RESULT scs_telemetry_init(
+SCSAPI_RESULT scs_telemetry_init(
     const scs_u32_t version,
     const scs_telemetry_init_params_t* const params)
 {
@@ -210,7 +210,7 @@ extern "C" __declspec(dllexport) SCSAPI_RESULT scs_telemetry_init(
     return SCS_RESULT_ok;
 }
 
-extern "C" __declspec(dllexport) SCSAPI_VOID scs_telemetry_shutdown(void)
+SCSAPI_VOID scs_telemetry_shutdown(void)
 {
     stopPipeServer();
 }
