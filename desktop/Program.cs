@@ -137,7 +137,7 @@ internal sealed class JvrsmMainForm : Form
         assistantText.ForeColor = Color.FromArgb(182, 213, 226);
         assistantText.AutoSize = true;
         assistantText.Location = new Point(205, 115);
-        var voiceButton = MakeButton("OUVIR MENSAGEM");
+        var voiceButton = MakeButton("TESTAR VOZ");
         voiceButton.Location = new Point(205, 155);
         voiceButton.Size = new Size(190, 42);
         voiceButton.Click += (_, _) => Speak("Olá! Eu sou a SCANIA. Como posso ajudar na sua viagem?");
