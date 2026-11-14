@@ -1,0 +1,18 @@
+JVRSMPLAY — Plugin de telemetria ETS2 x64
+
+Esta DLL foi compilada para Windows x64 e usa o SDK oficial de telemetria da SCS.
+
+Instalação manual para teste:
+1. Feche o Euro Truck Simulator 2.
+2. Abra a pasta de instalação do ETS2.
+3. Entre em bin\win_x64\plugins. Se a pasta plugins não existir, crie-a.
+4. Copie JVRSMPLAY-ETS2-x64.dll para essa pasta.
+5. Abra o ETS2 e confirme se o plugin é carregado no log do jogo.
+6. Abra o JVRSMPLAY no Windows. O painel só mostrará consumo quando receber dados reais do jogo.
+
+Importante:
+- Esta etapa ainda não faz a instalação automática no diretório do ETS2.
+- O plugin envia apenas consumo médio de combustível para o aplicativo.
+- A unidade recebida do SDK é convertida de L/km para L/100 km.
+- A compatibilidade final precisa ser testada no ETS2 1.62; a compilação da DLL, sozinha, não comprova funcionamento no jogo.
+- Não substitua DLLs de outros mods ou plugins. Faça uma cópia de segurança antes de instalar.
