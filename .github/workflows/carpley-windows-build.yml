@@ -8,6 +8,7 @@ on:
     paths:
       - "desktop/**"
       - "app/**"
+      - "plugin/**"
       - "installer/**"
       - "docs/ETS2-1.62-INTEGRACAO.md"
       - ".github/workflows/carpley-windows-build.yml"
@@ -27,6 +28,53 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Download official SCS Telemetry SDK 1.16
+        shell: pwsh
+        run: |
+          $sdkZip = Join-Path $env:RUNNER_TEMP "scs_sdk_1_16.zip"
+          $sdkRoot = Join-Path $env:RUNNER_TEMP "scs_sdk_1_16"
+          Invoke-WebRequest -Uri "https://download.eurotrucksimulator2.com/scs_sdk_1_16.zip" -OutFile $sdkZip
+          Expand-Archive -Path $sdkZip -DestinationPath $sdkRoot -Force
+          $sdkHeader = Get-ChildItem -Path $sdkRoot -Recurse -Filter "scssdk_telemetry.h" | Select-Object -First 1
+          if (!$sdkHeader) { throw "Official SCS SDK telemetry header was not found in the archive." }
+          $sdkIncludeDir = $sdkHeader.DirectoryName
+          if (!(Test-Path (Join-Path $sdkIncludeDir "common\scssdk_telemetry_truck_common_channels.h"))) {
+            throw "Official SCS SDK common truck channel header was not found."
+          }
+          "SCS_SDK_INCLUDE_DIR=$sdkIncludeDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build native ETS2 x64 telemetry plugin
+        shell: pwsh
+        run: |
+          cmake -S plugin -B build/plugin -A x64 "-DSCS_SDK_INCLUDE_DIR=$env:SCS_SDK_INCLUDE_DIR"
+          cmake --build build/plugin --config Release
+          $builtDll = "build/plugin/Release/JVRSMPLAY-ETS2-x64.dll"
+          if (!(Test-Path $builtDll)) { throw "Native ETS2 x64 plugin DLL was not generated." }
+
+          $pluginDir = "artifacts/JVRSMPLAY-win-x64/ETS2-Plugin"
+          New-Item -ItemType Directory -Force -Path $pluginDir | Out-Null
+          Copy-Item $builtDll (Join-Path $pluginDir "JVRSMPLAY-ETS2-x64.dll")
+          Copy-Item "plugin/INSTALL.txt" $pluginDir
+          Copy-Item "plugin/LICENSE-SCS-SDK.txt" $pluginDir
+
+          # Verify the PE machine type is AMD64 (x64).
+          $bytes = [System.IO.File]::ReadAllBytes((Join-Path $pluginDir "JVRSMPLAY-ETS2-x64.dll"))
+          $peOffset = [BitConverter]::ToInt32($bytes, 0x3c)
+          if ([BitConverter]::ToUInt32($bytes, $peOffset) -ne 0x00004550) { throw "Plugin DLL has an invalid PE signature." }
+          $machine = [BitConverter]::ToUInt16($bytes, $peOffset + 4)
+          if ($machine -ne 0x8664) { throw ("Plugin is not x64. PE machine: 0x{0:X4}" -f $machine) }
+
+          $vswhere = Join-Path "${env:ProgramFiles(x86)}" "Microsoft Visual Studio\Installer\vswhere.exe"
+          if (!(Test-Path $vswhere)) { throw "Visual Studio locator was not found; cannot verify plugin exports." }
+          $vsPath = & $vswhere -latest -products "*" -property installationPath
+          $dumpbin = Get-ChildItem (Join-Path $vsPath "VC\Tools\MSVC") -Filter "dumpbin.exe" -Recurse |
+            Where-Object { $_.FullName -like "*\Hostx64\x64\dumpbin.exe" } |
+            Select-Object -First 1
+          if (!$dumpbin) { throw "dumpbin.exe was not found; cannot verify plugin exports." }
+          $exports = (& $dumpbin.FullName /exports (Join-Path $pluginDir "JVRSMPLAY-ETS2-x64.dll")) -join "`n"
+          if ($exports -notmatch "\bscs_telemetry_init\b") { throw "Required export scs_telemetry_init is missing." }
+          if ($exports -notmatch "\bscs_telemetry_shutdown\b") { throw "Required export scs_telemetry_shutdown is missing." }
+
       - name: Publish JVRSMPLAY for Windows x64
         run: dotnet publish desktop/CARPLEY.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/JVRSMPLAY-win-x64
 
@@ -35,8 +83,9 @@ jobs:
         run: |
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/JVRSMPLAY.exe")) { throw "JVRSMPLAY.exe was not generated." }
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/app/index.html")) { throw "Central app/index.html was not included." }
+          if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/ETS2-Plugin/JVRSMPLAY-ETS2-x64.dll")) { throw "ETS2 x64 plugin DLL was not included." }
 
-      - name: Scan application files with Microsoft Defender
+      - name: Scan application and plugin files with Microsoft Defender
         shell: pwsh
         run: |
           Update-MpSignature
@@ -64,18 +113,26 @@ jobs:
           & $mp -Scan -ScanType 3 -File (Resolve-Path "artifacts/JVRSMPLAY-Setup-x64.msi")
           if ($LASTEXITCODE -ne 0) { throw "Microsoft Defender reported a scan error or detection. Do not distribute this MSI." }
 
-      - name: Create SHA256 checksum
+      - name: Package standalone ETS2 plugin test ZIP
         shell: pwsh
         run: |
-          $hash = Get-FileHash "artifacts/JVRSMPLAY-Setup-x64.msi" -Algorithm SHA256
-          "$($hash.Hash)  JVRSMPLAY-Setup-x64.msi" | Out-File "artifacts/SHA256.txt" -Encoding ascii
+          Compress-Archive -Path "artifacts/JVRSMPLAY-win-x64/ETS2-Plugin/*" -DestinationPath "artifacts/JVRSMPLAY-ETS2-Plugin-x64.zip" -Force
 
-      - name: Upload Windows installer
+      - name: Create SHA256 checksums
+        shell: pwsh
+        run: |
+          $msiHash = Get-FileHash "artifacts/JVRSMPLAY-Setup-x64.msi" -Algorithm SHA256
+          $pluginHash = Get-FileHash "artifacts/JVRSMPLAY-ETS2-Plugin-x64.zip" -Algorithm SHA256
+          "$($msiHash.Hash)  JVRSMPLAY-Setup-x64.msi" | Out-File "artifacts/SHA256.txt" -Encoding ascii
+          "$($pluginHash.Hash)  JVRSMPLAY-ETS2-Plugin-x64.zip" | Out-File "artifacts/SHA256.txt" -Append -Encoding ascii
+
+      - name: Upload Windows installer and ETS2 plugin
         uses: actions/upload-artifact@v4
         with:
-          name: JVRSMPLAY-MSI-x64
+          name: JVRSMPLAY-Windows-x64-Test
           path: |
             artifacts/JVRSMPLAY-Setup-x64.msi
+            artifacts/JVRSMPLAY-ETS2-Plugin-x64.zip
             artifacts/SHA256.txt
           if-no-files-found: error
           retention-days: 14
