@@ -2,7 +2,7 @@
 #define NOMINMAX
 #include <windows.h>
 
-#include <atomic>
+#include <chrono>
 #include <cmath>
 #include <condition_variable>
 #include <cstdio>
@@ -96,36 +96,28 @@ void pipeServerLoop()
 
             {
                 std::unique_lock<std::mutex> lock(g_stateMutex);
-                g_stateChanged.wait_for(lock, std::chrono::milliseconds(500), [] {
-                    return !g_running;
+                g_stateChanged.wait_for(lock, std::chrono::milliseconds(1000), [&] {
+                    return !g_running || g_sequence != lastSentSequence;
                 });
                 if (!g_running) break;
 
                 sequence = g_sequence;
-                if (sequence == lastSentSequence) {
-                    // wait_for's predicate is only for shutdown; check the sequence
-                    // after the timeout/wakeup to avoid polling the game thread.
-                    g_stateChanged.wait_for(lock, std::chrono::milliseconds(100), [&] {
-                        return !g_running || g_sequence != lastSentSequence;
-                    });
-                    if (!g_running) break;
-                    sequence = g_sequence;
-                }
-
                 if (sequence == lastSentSequence) continue;
+
                 available = g_hasConsumption;
                 consumption = g_consumptionLPer100Km;
                 lastSentSequence = sequence;
             }
 
-            if (!available) continue;
-
             char message[160]{};
-            const int length = std::snprintf(
-                message,
-                sizeof(message),
-                "{\"type\":\"consumption\",\"value\":%.3f,\"unit\":\"L/100km\"}\n",
-                consumption);
+            const int length = available
+                ? std::snprintf(
+                    message, sizeof(message),
+                    "{\"type\":\"consumption\",\"available\":true,\"value\":%.3f,\"unit\":\"L/100km\"}\n",
+                    consumption)
+                : std::snprintf(
+                    message, sizeof(message),
+                    "{\"type\":\"consumption\",\"available\":false}\n");
 
             if (length <= 0 || length >= static_cast<int>(sizeof(message))) {
                 continue;
@@ -138,7 +130,6 @@ void pipeServerLoop()
             }
         }
 
-        FlushFileBuffers(pipe);
         DisconnectNamedPipe(pipe);
         CloseHandle(pipe);
     }
@@ -202,7 +193,10 @@ extern "C" __declspec(dllexport) SCSAPI_RESULT scs_telemetry_init(
     try {
         g_pipeThread = std::thread(pipeServerLoop);
     } catch (...) {
-        g_running = false;
+        {
+            std::lock_guard<std::mutex> lock(g_stateMutex);
+            g_running = false;
+        }
         versionParams->unregister_from_channel(
             SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption,
             SCS_U32_NIL,
