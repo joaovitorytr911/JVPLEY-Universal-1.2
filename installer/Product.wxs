@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="JVRSMPLAY"
+    Manufacturer="JVRSMPLAY"
+    Version="1.3.0"
+    UpgradeCode="{A7C2C5E1-6D72-4A37-8E5D-2F5A7C3D913B}"
+    Scope="perMachine">
+
+    <SummaryInformation Description="JVRSMPLAY para Windows 11 x64" />
+
+    <MajorUpgrade DowngradeErrorMessage="Uma versão mais recente do JVRSMPLAY já está instalada." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="JVRSMPLAY" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="JVRSMPLAY" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="JVRSMPLAY" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+    <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="*">
+      <Shortcut
+        Id="JVRSMPLAYStartMenuShortcut"
+        Name="JVRSMPLAY"
+        Target="[INSTALLFOLDER]JVRSMPLAY.exe"
+        WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="RemoveJVRSMPLAYStartMenuFolder" On="uninstall" />
+      <RegistryValue
+        Root="HKLM"
+        Key="Software\JVRSMPLAY"
+        Name="Installed"
+        Type="integer"
+        Value="1"
+        KeyPath="yes" />
+    </Component>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>
