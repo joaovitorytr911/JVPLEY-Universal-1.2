@@ -1,53 +1,57 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+using Microsoft.Web.WebView2.WinForms;
+using System.Drawing;
+using System.Windows.Forms;
 
-namespace CARPLEY.Desktop;
+namespace JVRSMPLAY.Desktop;
 
 internal static class Program
 {
     [STAThread]
     private static void Main()
     {
+        ApplicationConfiguration.Initialize();
+
         string pagePath = Path.Combine(AppContext.BaseDirectory, "app", "index.html");
         if (!File.Exists(pagePath))
         {
-            ShowMessage("Não encontrei a pasta app\\index.html. Extraia todos os arquivos do pacote antes de iniciar.", "CARPLEY");
+            MessageBox.Show(
+                "Não encontrei app\\index.html. Reinstale o JVRSMPLAY usando o pacote completo.",
+                "JVRSMPLAY",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
             return;
         }
 
-        string pageUrl = new Uri(pagePath).AbsoluteUri;
-        string[] browsers =
+        var window = new Form
         {
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Microsoft", "Edge", "Application", "msedge.exe"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Microsoft", "Edge", "Application", "msedge.exe"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Google", "Chrome", "Application", "chrome.exe"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Google", "Chrome", "Application", "chrome.exe")
+            Text = "JVRSMPLAY",
+            WindowState = FormWindowState.Maximized,
+            StartPosition = FormStartPosition.CenterScreen,
+            MinimumSize = new Size(900, 600),
+            BackColor = Color.FromArgb(3, 9, 16)
         };
 
-        try
+        var browser = new WebView2 { Dock = DockStyle.Fill };
+        window.Controls.Add(browser);
+
+        window.Shown += async (_, _) =>
         {
-            string? browser = browsers.FirstOrDefault(File.Exists);
-            if (browser is not null)
+            try
             {
-                var start = new ProcessStartInfo(browser) { UseShellExecute = false };
-                start.ArgumentList.Add("--app=" + pageUrl);
-                start.ArgumentList.Add("--start-fullscreen");
-                start.ArgumentList.Add("--no-first-run");
-                Process.Start(start);
-                return;
+                await browser.EnsureCoreWebView2Async();
+                browser.Source = new Uri(pagePath);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Não foi possível iniciar o componente WebView2. Verifique se o Microsoft Edge WebView2 Runtime está instalado.\\n\\n" + ex.Message,
+                    "JVRSMPLAY - inicialização",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                window.Close();
+            }
+        };
 
-            Process.Start(new ProcessStartInfo(pageUrl) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            ShowMessage("Não foi possível abrir a central CARPLEY.\n\n" + ex.Message, "CARPLEY - falha ao iniciar");
-        }
+        Application.Run(window);
     }
-
-    private static void ShowMessage(string message, string title) =>
-        MessageBox(IntPtr.Zero, message, title, 0x10);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);
 }
