@@ -24,8 +24,10 @@ add_library(JVRSMPLAYTelemetry SHARED
 
 target_compile_features(JVRSMPLAYTelemetry PRIVATE cxx_std_17)
 target_include_directories(JVRSMPLAYTelemetry PRIVATE "${SCS_SDK_INCLUDE_DIR}")
-target_compile_definitions(JVRSMPLAYTelemetry PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_definitions(JVRSMPLAYTelemetry PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX _WIN32_WINNT=0x0600)
 target_compile_options(JVRSMPLAYTelemetry PRIVATE /W4 /permissive- /EHsc)
+
+set_property(TARGET JVRSMPLAYTelemetry PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set_target_properties(JVRSMPLAYTelemetry PROPERTIES
     PREFIX ""
