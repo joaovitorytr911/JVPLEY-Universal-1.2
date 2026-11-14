@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IO.Pipes;
 using System.Text.Json;
 
@@ -43,12 +42,14 @@ internal sealed class TelemetryPipeClient
                         var root = document.RootElement;
 
                         if (!root.TryGetProperty("type", out var type) ||
+                            type.ValueKind != JsonValueKind.String ||
                             type.GetString() != "consumption" ||
                             !root.TryGetProperty("value", out var valueElement) ||
                             !valueElement.TryGetDouble(out var value) ||
                             !double.IsFinite(value) ||
                             value < 0 ||
                             !root.TryGetProperty("unit", out var unitElement) ||
+                            unitElement.ValueKind != JsonValueKind.String ||
                             unitElement.GetString() != "L/100km")
                         {
                             continue;
