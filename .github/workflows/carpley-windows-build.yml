@@ -78,6 +78,15 @@ jobs:
       - name: Publish JVRSMPLAY for Windows x64
         run: dotnet publish desktop/CARPLEY.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/JVRSMPLAY-win-x64
 
+      - name: Restore plugin files after app publish
+        shell: pwsh
+        run: |
+          $pluginDir = "artifacts/JVRSMPLAY-win-x64/ETS2-Plugin"
+          New-Item -ItemType Directory -Force -Path $pluginDir | Out-Null
+          Copy-Item "build/plugin/Release/JVRSMPLAY-ETS2-x64.dll" $pluginDir -Force
+          Copy-Item "plugin/INSTALL.txt" $pluginDir -Force
+          Copy-Item "plugin/LICENSE-SCS-SDK.txt" $pluginDir -Force
+
       - name: Verify executable and central files
         shell: pwsh
         run: |
