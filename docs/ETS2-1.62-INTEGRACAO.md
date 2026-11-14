@@ -54,3 +54,17 @@ Até cumprir esses critérios, a integração permanece em desenvolvimento e nã
 5. Só depois realizar teste real no ETS2 1.62: carregamento do plugin, leitura de consumo e encerramento/desconexão.
 
 **Status atual: integração ainda não implementada.** Esta auditoria não cria nem representa uma DLL funcional.
+## Ponte local do aplicativo — 2026-11-14
+- Implementado no aplicativo Windows um cliente Named Pipe chamado `JVRSMPLAY.Telemetry.v1`.
+- Protocolo esperado: uma mensagem JSON por linha, no formato `{"type":"consumption","value":12.3,"unit":"L/100km"}`.
+- O cliente aceita somente mensagens do tipo `consumption`, unidade exata `L/100km` e valor numérico finito não negativo; mensagens inválidas são ignoradas.
+- A interface mostra o consumo recebido e o estado da conexão. Sem plugin conectado, continua mostrando `--` e não inventa valores.
+- A conexão usa Named Pipe local, sem abrir porta TCP.
+
+### Limite desta etapa
+O lado cliente do canal local está implementado. O servidor do Named Pipe dentro da DLL nativa ainda não existe. Portanto, ainda não há plugin ETS2 compilado, nem leitura real do jogo. A compilação Windows precisa confirmar que o novo cliente C# compila antes de avançar para o servidor nativo.
+
+## Referências técnicas consultadas
+- O cabeçalho público espelhado `scssdk_telemetry.h` descreve a inicialização/exportação do plugin e as versões de API 1.00/1.01.
+- Implementações públicas registram `TRUCK_CHANNEL_fuel_average_consumption` como canal de consumo médio. Essas referências servem para orientar a implementação, não comprovam suporte do ETS2 1.62.
+- Não foi identificada nesta etapa uma confirmação oficial de compatibilidade da API com ETS2 1.62. Exigir teste real no jogo.
