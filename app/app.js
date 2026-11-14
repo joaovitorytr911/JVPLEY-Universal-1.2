@@ -69,3 +69,8 @@ function setTelemetryConnection(connected){
     ? 'Plugin ETS2 conectado. Exibindo consumo recebido do jogo.'
     : 'Telemetria desconectada. Aguardando conexão com o ETS2.';
 }
+
+function clearTelemetryConsumption(){
+  const output=document.getElementById('consumptionValue');
+  if(output) output.innerHTML='-- <em>L/100 km</em>';
+}
