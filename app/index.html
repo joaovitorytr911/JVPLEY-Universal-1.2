@@ -23,12 +23,18 @@
       <button class="app" data-app="radio"><strong>◖))</strong><span>Rádio BR FM</span><small>F4</small></button>
       <button class="app" data-app="maps"><strong>⌖</strong><span>Maps BR</span><small>F5</small></button>
     </section>
+    <section class="audio-panel" aria-label="Controle de volume">
+      <div><p class="eyebrow">ÁUDIO DO SISTEMA</p><h2>CONTROLE DE VOLUME</h2>
+        <p class="note">Ajusta a voz e os sons reproduzidos pelo próprio JVRSMPLAY.</p></div>
+      <div class="volume-dial" id="volumeDial" style="--volume:70%">
+        <div class="volume-center"><strong id="volumeValue">70%</strong><span>VOLUME</span></div>
+        <input id="volumeControl" type="range" min="0" max="100" value="70" aria-label="Volume da voz e dos sons do JVRSMPLAY">
+      </div>
+    </section>
     <section class="vehicle">
-      <div><p class="eyebrow">PAINEL DO VEÍCULO</p><h2>JVRSMPLAY • MODO MULTIMÍDIA</h2></div>
-      <div class="metrics"><div><small>VELOCIDADE</small><b>-- <em>km/h</em></b></div>
-      <div><small>COMBUSTÍVEL</small><b>-- <em>%</em></b></div>
-      <div><small>CAMINHÃO</small><b>ETS2</b></div></div>
-      <p class="note">Telemetria demonstrativa — conexão real ainda não configurada.</p>
+      <div><p class="eyebrow">PAINEL DO VEÍCULO</p><h2>TELEMETRIA ETS2</h2></div>
+      <div class="metrics"><div><small>CONSUMO</small><b>-- <em>L/100 km</em></b></div></div>
+      <p class="note">Aguardando conexão com o ETS2. Nenhum dado de telemetria está sendo simulado.</p>
     </section>
   </main>
   <footer>ATALHOS: F2 YouTube • F3 Spotify • F4 Rádio • F5 Maps <span>JVRSMPLAY</span></footer>
