@@ -1,4 +1,4 @@
-name: JVRSMPLAY Windows build
+name: JVRSMPLAY Windows build and MSI
 
 on:
   workflow_dispatch:
@@ -8,6 +8,8 @@ on:
     paths:
       - "desktop/**"
       - "app/**"
+      - "installer/**"
+      - "docs/ETS2-1.62-INTEGRACAO.md"
       - ".github/workflows/carpley-windows-build.yml"
 
 permissions:
@@ -34,7 +36,7 @@ jobs:
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/JVRSMPLAY.exe")) { throw "JVRSMPLAY.exe was not generated." }
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/app/index.html")) { throw "Central app/index.html was not included." }
 
-      - name: Scan build with Microsoft Defender
+      - name: Scan application files with Microsoft Defender
         shell: pwsh
         run: |
           Update-MpSignature
@@ -43,21 +45,37 @@ jobs:
           & $mp -Scan -ScanType 3 -File (Resolve-Path "artifacts/JVRSMPLAY-win-x64")
           if ($LASTEXITCODE -ne 0) { throw "Microsoft Defender reported a scan error or detection. Do not distribute this build." }
 
-      - name: Package Windows app
-        run: Compress-Archive -Path artifacts/JVRSMPLAY-win-x64/* -DestinationPath artifacts/JVRSMPLAY-Windows-x64.zip
+      - name: Install WiX Toolset
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix --version
+
+      - name: Build Windows x64 MSI
+        shell: pwsh
+        run: |
+          wix build installer/Product.wxs -arch x64 -d PublishDir="$((Resolve-Path 'artifacts/JVRSMPLAY-win-x64').Path)" -o artifacts/JVRSMPLAY-Setup-x64.msi
+          if (!(Test-Path "artifacts/JVRSMPLAY-Setup-x64.msi")) { throw "MSI was not generated." }
+
+      - name: Scan MSI with Microsoft Defender
+        shell: pwsh
+        run: |
+          $mp = Join-Path $env:ProgramFiles "Windows Defender\MpCmdRun.exe"
+          & $mp -Scan -ScanType 3 -File (Resolve-Path "artifacts/JVRSMPLAY-Setup-x64.msi")
+          if ($LASTEXITCODE -ne 0) { throw "Microsoft Defender reported a scan error or detection. Do not distribute this MSI." }
 
       - name: Create SHA256 checksum
         shell: pwsh
         run: |
-          $hash = Get-FileHash "artifacts/JVRSMPLAY-Windows-x64.zip" -Algorithm SHA256
-          "$($hash.Hash)  JVRSMPLAY-Windows-x64.zip" | Out-File "artifacts/SHA256.txt" -Encoding ascii
+          $hash = Get-FileHash "artifacts/JVRSMPLAY-Setup-x64.msi" -Algorithm SHA256
+          "$($hash.Hash)  JVRSMPLAY-Setup-x64.msi" | Out-File "artifacts/SHA256.txt" -Encoding ascii
 
-      - name: Upload Windows build
+      - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: JVRSMPLAY-Windows-x64
+          name: JVRSMPLAY-MSI-x64
           path: |
-            artifacts/JVRSMPLAY-Windows-x64.zip
+            artifacts/JVRSMPLAY-Setup-x64.msi
             artifacts/SHA256.txt
           if-no-files-found: error
           retention-days: 14
