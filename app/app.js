@@ -56,3 +56,16 @@ document.getElementById('voiceBtn').addEventListener('click',()=>{
 });
 function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 tick();setInterval(tick,10000);
+
+ 
+// Atualizado pelo cliente IPC local somente quando o plugin enviar dado válido.
+function setTelemetryConsumption(value){
+  const output=document.getElementById('consumptionValue');
+  if(output) output.innerHTML=Number(value).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' <em>L/100 km</em>';
+}
+function setTelemetryConnection(connected){
+  const status=document.getElementById('telemetryStatus');
+  if(status) status.textContent=connected
+    ? 'Plugin ETS2 conectado. Exibindo consumo recebido do jogo.'
+    : 'Telemetria desconectada. Aguardando conexão com o ETS2.';
+}
