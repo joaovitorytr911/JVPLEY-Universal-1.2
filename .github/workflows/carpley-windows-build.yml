@@ -76,7 +76,7 @@ jobs:
           if ($exports -notmatch "\bscs_telemetry_shutdown\b") { throw "Required export scs_telemetry_shutdown is missing." }
 
       - name: Publish JVRSMPLAY for Windows x64
-        run: dotnet publish desktop/CARPLEY.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/JVRSMPLAY-win-x64
+        run: dotnet publish desktop/CARPLEY.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o artifacts/JVRSMPLAY-win-x64
 
       - name: Restore plugin files after app publish
         shell: pwsh
@@ -92,7 +92,11 @@ jobs:
         run: |
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/JVRSMPLAY.exe")) { throw "JVRSMPLAY.exe was not generated." }
           if (!(Test-Path "artifacts/JVRSMPLAY-win-x64/ETS2-Plugin/JVRSMPLAY-ETS2-x64.dll")) { throw "ETS2 x64 plugin DLL was not included." }
-          if (Test-Path "artifacts/JVRSMPLAY-win-x64/Microsoft.Web.WebView2*.dll") { throw "Unexpected WebView2 dependency remains in the published app." }
+          $webViewCore = Get-ChildItem "artifacts/JVRSMPLAY-win-x64" -Recurse -Filter "Microsoft.Web.WebView2.Core.dll" | Select-Object -First 1
+          $webViewForms = Get-ChildItem "artifacts/JVRSMPLAY-win-x64" -Recurse -Filter "Microsoft.Web.WebView2.WinForms.dll" | Select-Object -First 1
+          if (!$webViewCore -or !$webViewForms) { throw "WebView2 SDK assemblies are missing from the published app." }
+          $loader = Get-ChildItem "artifacts/JVRSMPLAY-win-x64" -Recurse -Filter "WebView2Loader.dll" | Select-Object -First 1
+          if (!$loader) { throw "WebView2 native loader is missing from the published app." }
 
       - name: Scan application and plugin files with Microsoft Defender
         shell: pwsh
