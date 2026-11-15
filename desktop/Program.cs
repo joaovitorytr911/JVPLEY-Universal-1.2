@@ -172,7 +172,6 @@ internal sealed class JvrsmMainForm : Form
     private void Radio() => MessageBox.Show("Rádio FM: as estações ainda precisam ser configuradas.", "JVRSMPLAY", MessageBoxButtons.OK, MessageBoxIcon.Information);
     private static void Open(string target) { try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); } catch (Exception ex) { MessageBox.Show(ex.Message, "JVRSMPLAY"); } }
     private void UpdateOnUi(Action update) { if (IsDisposed || !IsHandleCreated) return; try { BeginInvoke(update); } catch (InvalidOperationException) { } }
-}
     private void OpenWebApp(string url, string title)
     {
         var browser = new WebAppForm(url, title);
