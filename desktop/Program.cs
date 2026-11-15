@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Globalization;
 using System.Speech.Synthesis;
 using System.Windows.Forms;
+using Microsoft.Web.WebView2.WinForms;
+using Microsoft.Web.WebView2.Core;
 
 namespace JVRSMPLAY.Desktop;
 
@@ -99,10 +101,10 @@ internal sealed class JvrsmMainForm : Form
         KeyPreview = true;
         KeyDown += (_, e) =>
         {
-            if (e.KeyCode == Keys.F2) Open("https://www.youtube.com/");
-            if (e.KeyCode == Keys.F3) Open("https://open.spotify.com/");
+            if (e.KeyCode == Keys.F2) OpenWebApp("https://www.youtube.com/", "YouTube");
+            if (e.KeyCode == Keys.F3) OpenWebApp("https://open.spotify.com/", "Spotify");
             if (e.KeyCode == Keys.F4) Radio();
-            if (e.KeyCode == Keys.F5) Open("https://www.google.com/maps");
+            if (e.KeyCode == Keys.F5) OpenWebApp("https://www.google.com/maps", "GPS");
         };
     }
 
@@ -145,10 +147,10 @@ internal sealed class JvrsmMainForm : Form
         var apps = new TableLayoutPanel { Dock = DockStyle.Fill, BackColor = BackgroundColor, ColumnCount = 6, RowCount = 1, Padding = new Padding(0, 8, 0, 0) };
         for (int i = 0; i < 6; i++) apps.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / 6));
         AddApp(apps, "ᛒ\r\nBluetooth", () => Open("ms-settings:bluetooth"));
-        AddApp(apps, "♫\r\nSpotify", () => Open("https://open.spotify.com/"));
-        AddApp(apps, "▶\r\nYouTube", () => Open("https://www.youtube.com/"));
+        AddApp(apps, "♫\r\nSpotify", () => OpenWebApp("https://open.spotify.com/", "Spotify"));
+        AddApp(apps, "▶\r\nYouTube", () => OpenWebApp("https://www.youtube.com/", "YouTube"));
         AddApp(apps, "◖))\r\nRádio FM", Radio);
-        AddApp(apps, "⌖\r\nGPS", () => { Speak("Abrindo navegação."); Open("https://www.google.com/maps"); });
+        AddApp(apps, "⌖\r\nGPS", () => { Speak("Abrindo navegação."); OpenWebApp("https://www.google.com/maps", "GPS"); });
         AddApp(apps, "⚙\r\nConfigurações", () => MessageBox.Show("Configurações do JVRSMPLAY.", "JVRSMPLAY", MessageBoxButtons.OK, MessageBoxIcon.Information));
         root.Controls.Add(apps, 0, 4);
     }
@@ -171,3 +173,101 @@ internal sealed class JvrsmMainForm : Form
     private static void Open(string target) { try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); } catch (Exception ex) { MessageBox.Show(ex.Message, "JVRSMPLAY"); } }
     private void UpdateOnUi(Action update) { if (IsDisposed || !IsHandleCreated) return; try { BeginInvoke(update); } catch (InvalidOperationException) { } }
 }
+    private void OpenWebApp(string url, string title)
+    {
+        var browser = new WebAppForm(url, title);
+        browser.Show(this);
+    }
+}
+
+internal sealed class WebAppForm : Form
+{
+    private readonly string startUrl;
+    private readonly WebView2 webView = new() { Dock = DockStyle.Fill };
+    private readonly Label status = new()
+    {
+        Text = "Preparando o navegador integrado...",
+        Dock = DockStyle.Fill,
+        TextAlign = ContentAlignment.MiddleCenter,
+        ForeColor = Color.LightSkyBlue,
+        BackColor = Color.FromArgb(2, 7, 16)
+    };
+
+    public WebAppForm(string url, string title)
+    {
+        startUrl = url;
+        Text = $"JVRSMPLAY — {title}";
+        StartPosition = FormStartPosition.CenterParent;
+        WindowState = FormWindowState.Maximized;
+        MinimumSize = new Size(800, 550);
+        BackColor = Color.FromArgb(2, 7, 16);
+
+        var toolbar = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 48,
+            BackColor = Color.FromArgb(5, 25, 43),
+            Padding = new Padding(8),
+            WrapContents = false
+        };
+        AddToolbarButton(toolbar, "←", () => { if (webView.CoreWebView2?.CanGoBack == true) webView.CoreWebView2.GoBack(); });
+        AddToolbarButton(toolbar, "→", () => { if (webView.CoreWebView2?.CanGoForward == true) webView.CoreWebView2.GoForward(); });
+        AddToolbarButton(toolbar, "↻", () => webView.CoreWebView2?.Reload());
+        AddToolbarButton(toolbar, "Início", () => webView.CoreWebView2?.Navigate(startUrl));
+
+        Controls.Add(webView);
+        Controls.Add(status);
+        Controls.Add(toolbar);
+        status.BringToFront();
+        Shown += async (_, _) => await InitializeBrowserAsync();
+    }
+
+    private static void AddToolbarButton(FlowLayoutPanel toolbar, string caption, Action action)
+    {
+        var button = new Button
+        {
+            Text = caption,
+            AutoSize = true,
+            Height = 30,
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(5, 61, 91),
+            ForeColor = Color.White,
+            Margin = new Padding(4, 0, 4, 0)
+        };
+        button.FlatAppearance.BorderColor = Color.DeepSkyBlue;
+        button.Click += (_, _) => action();
+        toolbar.Controls.Add(button);
+    }
+
+    private async Task InitializeBrowserAsync()
+    {
+        try
+        {
+            var dataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "JVRSMPLAY", "WebView2");
+            Directory.CreateDirectory(dataFolder);
+            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: dataFolder);
+            await webView.EnsureCoreWebView2Async(environment);
+            webView.CoreWebView2.Navigate(startUrl);
+            status.Visible = false;
+        }
+        catch (Exception ex)
+        {
+            status.Text = "Não foi possível iniciar o navegador integrado.\r\n" +
+                "Verifique se o Microsoft Edge WebView2 Runtime está instalado.\r\n\r\n" +
+                ex.Message;
+            var install = MessageBox.Show(
+                "O WebView2 Runtime pode estar ausente. Deseja abrir a página oficial da Microsoft para instalá-lo?",
+                "JVRSMPLAY — WebView2",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+            if (install == DialogResult.Yes)
+            {
+                try { Process.Start(new ProcessStartInfo("https://developer.microsoft.com/microsoft-edge/webview2/") { UseShellExecute = true }); }
+                catch { }
+            }
+        }
+    }
+}
+
